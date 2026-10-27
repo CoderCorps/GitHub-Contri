@@ -1,0 +1,235 @@
+name: Analyze PR & Auto-Merge Cards
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  analyze-and-merge:
+    name: Analyze Changes & Auto-Merge
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout base repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Analyze PR Files & Auto-Merge
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = context.payload.pull_request.number;
+            const prAuthor = context.payload.pull_request.user.login.toLowerCase();
+
+            console.log(`Analyzing PR #${prNumber} by @${prAuthor}...`);
+
+            // 1. Fetch all files modified in this PR
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner,
+              repo,
+              pull_number: prNumber,
+            });
+
+            const changedFileNames = files.map(f => f.filename);
+            console.log('Changed files:', changedFileNames);
+
+            // 2. Strict Check: Are all files inside cards/ ?
+            const nonCardFiles = changedFileNames.filter(f => !f.startsWith('cards/'));
+            if (nonCardFiles.length > 0) {
+              const errorMsg = `### ⛔ Auto-Merge Rejected
+              
+              This Pull Request modifies files outside the \`cards/\` directory:
+              ${nonCardFiles.map(f => `- \`${f}\``).join('\n')}
+              
+              **Policy:** Auto-merge is only granted to PRs that strictly add or modify their individual contributor card in \`cards/<your-github-username>.json\`. 
+              
+              A maintainer will need to manually review this PR.`;
+              
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: errorMsg
+              });
+              
+              core.setFailed(`PR touches forbidden files outside cards/: ${nonCardFiles.join(', ')}`);
+              return;
+            }
+
+            // 3. Check card count (One contributor, one file)
+            const cardFiles = changedFileNames.filter(f => f.startsWith('cards/') && f.endsWith('.json'));
+            if (cardFiles.length === 0) {
+              core.setFailed('No JSON card file found in cards/ directory.');
+              return;
+            }
+
+            if (cardFiles.length > 1) {
+              const msg = `### ⚠️ Multiple Cards Detected
+              
+              This PR modifies ${cardFiles.length} cards:
+              ${cardFiles.map(f => `- \`${f}\``).join('\n')}
+              
+              Each contributor PR should strictly add or edit exactly **one** card file.`;
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: msg
+              });
+
+              core.setFailed(`PR modifies ${cardFiles.length} cards. Only 1 card is allowed per PR.`);
+              return;
+            }
+
+            const targetCard = cardFiles[0];
+            const cardBaseName = targetCard.replace(/^cards\//, '').replace(/\.json$/, '').toLowerCase();
+
+            // 4. Check filename matches PR author
+            if (cardBaseName !== prAuthor) {
+              const mismatchMsg = `### ⚠️ Filename Username Mismatch
+              
+              Your card file is named \`${targetCard}\`, but your GitHub username is **@${prAuthor}**.
+              
+              Please rename your file to \`cards/${prAuthor}.json\` so it passes validation.`;
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: mismatchMsg
+              });
+
+              core.setFailed(`Filename mismatch: expected cards/${prAuthor}.json, got ${targetCard}`);
+              return;
+            }
+
+            // 5. Fetch file content from PR head to validate JSON schema
+            const cardFileObj = files.find(f => f.filename === targetCard);
+            let rawContent = '';
+            
+            try {
+              const { data: fileData } = await github.rest.repos.getContent({
+                owner,
+                repo,
+                path: targetCard,
+                ref: context.payload.pull_request.head.sha
+              });
+              rawContent = Buffer.from(fileData.content, 'base64').toString('utf-8');
+            } catch (err) {
+              core.setFailed(`Could not retrieve content for ${targetCard}: ${err.message}`);
+              return;
+            }
+
+            // 6. Validate JSON Syntax
+            let cardJson;
+            try {
+              cardJson = JSON.parse(rawContent);
+            } catch (err) {
+              const jsonErrorMsg = `### ❌ Invalid JSON Syntax
+              
+              We could not parse \`${targetCard}\`:
+              \`\`\`
+              ${err.message}
+              \`\`\`
+              Please check your JSON formatting (missing comma, unquoted key, etc.) and push an update.`;
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: jsonErrorMsg
+              });
+
+              core.setFailed(`Invalid JSON in ${targetCard}: ${err.message}`);
+              return;
+            }
+
+            // 7. Validate Card Fields
+            const validationErrors = [];
+            if (!cardJson.name || typeof cardJson.name !== 'string' || cardJson.name.length < 2 || cardJson.name.length > 50) {
+              validationErrors.push('Field "name" must be a string between 2 and 50 characters.');
+            }
+            if (!cardJson.github || cardJson.github.toLowerCase() !== prAuthor) {
+              validationErrors.push(`Field "github" must match your GitHub username "${prAuthor}".`);
+            }
+            if (!cardJson.bio || typeof cardJson.bio !== 'string' || cardJson.bio.length < 5 || cardJson.bio.length > 180) {
+              validationErrors.push('Field "bio" must be between 5 and 180 characters.');
+            }
+            if (!Array.isArray(cardJson.skills) || cardJson.skills.length < 1 || cardJson.skills.length > 12) {
+              validationErrors.push('Field "skills" must be an array with 1 to 12 items.');
+            }
+
+            if (validationErrors.length > 0) {
+              const validationMsg = `### ❌ Card Validation Errors
+              
+              The following issues were found in \`${targetCard}\`:
+              ${validationErrors.map(e => `- ${e}`).join('\n')}
+              
+              Please fix these issues and push your changes to this branch.`;
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: validationMsg
+              });
+
+              core.setFailed(`Validation failed with ${validationErrors.length} errors.`);
+              return;
+            }
+
+            // 8. ALL CHECKS PASSED -> AUTO-MERGE!
+            console.log(`✔ All validation checks passed for ${targetCard}. Merging PR #${prNumber}...`);
+
+            const successMsg = `### 🎉 Congratulations @${prAuthor}!
+            
+            - ✅ Strictly touched only \`cards/\` directory.
+            - ✅ Validated JSON format & schema cleanly.
+            - ✅ File name matches username \`${targetCard}\`.
+            
+            🚀 **This Pull Request is being automatically merged!** 
+            Your card will appear on the live website in ~1-2 minutes. Welcome to open source!`;
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: prNumber,
+              body: successMsg
+            });
+
+            // Add label
+            try {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: prNumber,
+                labels: ['auto-merged', 'community-card', 'good-first-pr']
+              });
+            } catch (e) {
+              console.log('Label assignment note:', e.message);
+            }
+
+            // Execute squash merge
+            await github.rest.pulls.merge({
+              owner,
+              repo,
+              pull_number: prNumber,
+              merge_method: 'squash',
+              commit_title: `feat(cards): add ${prAuthor} profile card (#${prNumber})`,
+              commit_message: `Auto-merged community card PR #${prNumber} from @${prAuthor}`
+            });
+
+            console.log(`🚀 PR #${prNumber} successfully auto-merged!`);
