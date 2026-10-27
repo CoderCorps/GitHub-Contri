@@ -2,10 +2,12 @@
   "name": "contributor-card-wall",
   "version": "1.0.0",
   "description": "An open source community platform where first-time contributors publish their profile card via Pull Requests.",
+  "workspaces": [
+    "site"
+  ],
   "scripts": {
     "validate": "node scripts/validate-cards.js",
     "validate:pr": "node scripts/validate-pr.js",
-    "site:install": "npm --prefix site install",
     "dev": "npm --prefix site run dev",
     "build": "node scripts/validate-cards.js && npm --prefix site run build",
     "preview": "npm --prefix site run preview"
