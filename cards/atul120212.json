@@ -1,12 +1,19 @@
 {
-  "name": "Atul Sharma",
-  "github": "atul120212",
-  "avatar": "https://github.com/atul120212.png",
-  "bio": "Open source maintainer and full-stack developer passionate about building community tools and helping beginners.",
-  "skills": ["JavaScript", "React", "Node.js", "Git", "GitHub Actions", "Vercel", "TailwindCSS"],
-  "links": {
-    "portfolio": "https://github.com/atul120212"
-  },
-  "firstPR": "Project Maintainer & Creator",
-  "joinedDate": "2026-10-27"
+    "name": "Ramm",
+    "github": "ram-dev",
+    "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=250&auto=format&fit=crop&q=80",
+    "bio": "CS student passionate about full-stack development, learning React, and making my first open source contributions!",
+    "skills": [
+        "JavaScript",
+        "React",
+        "Node.js",
+        "HTML",
+        "CSS",
+        "Git"
+    ],
+    "links": {
+        "portfolio": "https://github.com/ram-dev"
+    },
+    "firstPR": "joined via PR #5",
+    "joinedDate": "2026-10-27"
 }
