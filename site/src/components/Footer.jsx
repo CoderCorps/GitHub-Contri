@@ -2,7 +2,7 @@ import React from 'react';
 import { Heart, GitPullRequest } from 'lucide-react';
 import { GithubIcon } from './Icons';
 
-export default function Footer({ onOpenHowTo, onOpenGenerator }) {
+export default function Footer({ onOpenHowTo }) {
   return (
     <footer className="mt-20 border-t border-slate-800/80 bg-slate-950/60 backdrop-blur-md py-12 text-slate-400 text-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -20,9 +20,6 @@ export default function Footer({ onOpenHowTo, onOpenGenerator }) {
         <div className="flex flex-wrap items-center justify-center gap-6 text-slate-300 font-medium">
           <button onClick={onOpenHowTo} className="hover:text-emerald-400 transition-colors">
             Contributing Guide
-          </button>
-          <button onClick={onOpenGenerator} className="hover:text-emerald-400 transition-colors">
-            Card Maker
           </button>
           <a 
             href="https://github.com/CoderCorps/GitHub-Contri" 

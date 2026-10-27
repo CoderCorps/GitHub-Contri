@@ -1,7 +1,7 @@
 import React from 'react';
-import { Sparkles, Terminal, Code2, Users, Layers, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Terminal, Users, Layers, ShieldCheck, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
 
-export default function Hero({ totalContributors, totalSkills, onOpenGenerator, showFlowchart, setShowFlowchart }) {
+export default function Hero({ totalContributors, totalSkills, onOpenHowTo, showFlowchart, setShowFlowchart }) {
   return (
     <div className="relative pt-10 pb-6 text-center max-w-4xl mx-auto px-4 sm:px-6">
       
@@ -29,10 +29,11 @@ export default function Hero({ totalContributors, totalSkills, onOpenGenerator, 
       {/* CTA Buttons */}
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
         <button
-          onClick={onOpenGenerator}
-          className="px-6 py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+          onClick={onOpenHowTo}
+          className="px-6 py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
         >
-          ✨ Open Live Card Maker
+          <BookOpen className="w-4 h-4" />
+          <span>How to Contribute via PR</span>
         </button>
 
         <button
