@@ -1,8 +1,8 @@
 import React from 'react';
-import { GitPullRequest, PlusCircle, HelpCircle } from 'lucide-react';
+import { GitPullRequest, HelpCircle, GitFork } from 'lucide-react';
 import { GithubIcon } from './Icons';
 
-export default function Navbar({ onOpenGenerator, onOpenHowTo, contributorCount }) {
+export default function Navbar({ onOpenHowTo, contributorCount }) {
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -31,25 +31,18 @@ export default function Navbar({ onOpenGenerator, onOpenHowTo, contributorCount 
             title="How to contribute guide"
           >
             <HelpCircle className="w-4 h-4 text-emerald-400" />
-            <span className="hidden md:inline">How It Works</span>
-          </button>
-
-          <button
-            onClick={onOpenGenerator}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all transform active:scale-95"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>Create Card</span>
+            <span>How It Works</span>
           </button>
 
           <a
             href="https://github.com/CoderCorps/GitHub-Contri"
             target="_blank"
             rel="noreferrer"
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all transform active:scale-95"
             title="View on GitHub"
           >
-            <GithubIcon className="w-5 h-5" />
+            <GitFork className="w-4 h-4" />
+            <span>Fork Repo</span>
           </a>
         </div>
       </div>

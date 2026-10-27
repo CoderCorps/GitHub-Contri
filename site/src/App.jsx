@@ -4,7 +4,6 @@ import Hero from './components/Hero';
 import FlowchartVisual from './components/FlowchartVisual';
 import FilterBar from './components/FilterBar';
 import ContributorCard from './components/ContributorCard';
-import CardGeneratorModal from './components/CardGeneratorModal';
 import HowToContributeModal from './components/HowToContributeModal';
 import Footer from './components/Footer';
 import { initialCards } from './data/cards';
@@ -16,7 +15,6 @@ export default function App() {
   const [selectedSkill, setSelectedSkill] = useState(null);
   const [sortBy, setSortBy] = useState('newest');
   const [showFlowchart, setShowFlowchart] = useState(false);
-  const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [isHowToOpen, setIsHowToOpen] = useState(false);
 
   // Compute skill frequency
@@ -74,7 +72,6 @@ export default function App() {
     <div className="min-h-screen flex flex-col justify-between">
       <div>
         <Navbar
-          onOpenGenerator={() => setIsGeneratorOpen(true)}
           onOpenHowTo={() => setIsHowToOpen(true)}
           contributorCount={cards.length}
         />
@@ -83,7 +80,7 @@ export default function App() {
           <Hero
             totalContributors={cards.length}
             totalSkills={allSkills.length}
-            onOpenGenerator={() => setIsGeneratorOpen(true)}
+            onOpenHowTo={() => setIsHowToOpen(true)}
             showFlowchart={showFlowchart}
             setShowFlowchart={setShowFlowchart}
           />
@@ -108,10 +105,10 @@ export default function App() {
             </div>
             
             <button
-              onClick={() => setIsGeneratorOpen(true)}
+              onClick={() => setIsHowToOpen(true)}
               className="text-xs font-semibold px-3.5 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500 hover:text-slate-950 transition-all"
             >
-              + Submit Your Card
+              + How to Submit Your Card
             </button>
           </div>
 
@@ -162,19 +159,12 @@ export default function App() {
 
       <Footer
         onOpenHowTo={() => setIsHowToOpen(true)}
-        onOpenGenerator={() => setIsGeneratorOpen(true)}
       />
 
-      {/* Modals */}
-      <CardGeneratorModal
-        isOpen={isGeneratorOpen}
-        onClose={() => setIsGeneratorOpen(false)}
-      />
-
+      {/* Step-by-Step Contributing Guide Modal */}
       <HowToContributeModal
         isOpen={isHowToOpen}
         onClose={() => setIsHowToOpen(false)}
-        onOpenMaker={() => setIsGeneratorOpen(true)}
       />
     </div>
   );

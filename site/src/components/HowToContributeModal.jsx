@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import { 
   X, 
   GitPullRequest, 
-  GitFork, 
-  FileCode, 
-  CheckCircle2, 
   Terminal, 
   Globe, 
   Copy, 
@@ -12,7 +9,7 @@ import {
   ShieldAlert
 } from 'lucide-react';
 
-export default function HowToContributeModal({ isOpen, onClose, onOpenMaker }) {
+export default function HowToContributeModal({ isOpen, onClose }) {
   const [method, setMethod] = useState('web'); // 'web' or 'cli'
   const [copied, setCopied] = useState(false);
 
@@ -83,7 +80,7 @@ export default function HowToContributeModal({ isOpen, onClose, onOpenMaker }) {
               }`}
             >
               <Globe className="w-4 h-4" />
-              <span>Method 1: In the Browser (Easiest - 2 Mins)</span>
+              <span>Method 1: In the Browser (Via GitHub Web)</span>
             </button>
             <button
               onClick={() => setMethod('cli')}
@@ -174,21 +171,20 @@ export default function HowToContributeModal({ isOpen, onClose, onOpenMaker }) {
             </div>
           )}
 
-          {/* Bottom CTA to open card maker */}
+          {/* Bottom Note */}
           <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
             <div>
-              <h5 className="text-xs font-bold text-white">Need help generating your card JSON?</h5>
-              <p className="text-[11px] text-slate-400">Use our interactive form to craft your JSON and preview your card live.</p>
+              <h5 className="text-xs font-bold text-white">Always test your card before opening a PR!</h5>
+              <p className="text-[11px] text-slate-400">Run <code className="text-emerald-300 font-mono">npm run validate</code> in your terminal to verify your JSON against the schema.</p>
             </div>
-            <button
-              onClick={() => {
-                onClose();
-                if (onOpenMaker) onOpenMaker();
-              }}
+            <a
+              href="https://github.com/CoderCorps/GitHub-Contri"
+              target="_blank"
+              rel="noreferrer"
               className="px-3.5 py-1.5 rounded-lg bg-emerald-500 text-slate-950 text-xs font-bold hover:bg-emerald-400 transition-colors"
             >
-              Open Card Maker
-            </button>
+              Go to Repo
+            </a>
           </div>
 
         </div>
