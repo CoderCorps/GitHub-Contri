@@ -39,7 +39,7 @@ flowchart TD
 
 ---
 
-## 📁 Repository Structure
+## 📁 Repository Structures
 
 ```text
 ├── cards/                         # Contributor card files (one JSON file per person)
